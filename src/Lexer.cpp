@@ -7,67 +7,19 @@
 
 using namespace compiler;
 
-/*
- * Инициализация константных токенов
- * при инициализации указвается тип
- */
-    const Token Lexer::TOK_PLUS(ONE_LIT_DELIM, PLUS);
-    const Token Lexer::TOK_MINUS(ONE_LIT_DELIM, MINUS);
-    const Token Lexer::TOK_MULT(ONE_LIT_DELIM, MULT);
-    const Token Lexer::TOK_DIV(ONE_LIT_DELIM, DIV);
-    const Token Lexer::TOK_POW(ONE_LIT_DELIM, POW);
-
-    const Token Lexer::TOK_ASSIGN(ONE_LIT_DELIM, ASSIGN);
-
-    const Token Lexer::TOK_LPAREN(ONE_LIT_DELIM, LPAREN);
-    const Token Lexer::TOK_RPAREN(ONE_LIT_DELIM, RPAREN);
-    const Token Lexer::TOK_LBRACE(ONE_LIT_DELIM, LBRACE);
-    const Token Lexer::TOK_RBRACE(ONE_LIT_DELIM, RBRACE);
-    const Token Lexer::TOK_LBRACKET(ONE_LIT_DELIM, LBRACKET);
-    const Token Lexer::TOK_RBRACKET(ONE_LIT_DELIM, RBRACKET);
-
-    const Token Lexer::TOK_MORE(ONE_LIT_DELIM, MORE);
-    const Token Lexer::TOK_LESS(ONE_LIT_DELIM, LESS);
-    const Token Lexer::TOK_NOT(ONE_LIT_DELIM, NOT);
-
-    const Token Lexer::TOK_INCR(TWO_LIT_DELIM, INCR);
-    const Token Lexer::TOK_DECR(TWO_LIT_DELIM, DECR);
-
-    const Token Lexer::TOK_PLUS_ASSIGN(TWO_LIT_DELIM, PLUS_ASSIGN);
-    const Token Lexer::TOK_MINUS_ASSIGN(TWO_LIT_DELIM, MINUS_ASSIGN);
-    const Token Lexer::TOK_MULT_ASSIGN(TWO_LIT_DELIM, MULT_ASSIGN);
-    const Token Lexer::TOK_DIV_ASSIGN(TWO_LIT_DELIM, DIV_ASSIGN);
-
-    const Token Lexer::TOK_EQUALS(TWO_LIT_DELIM, EQUALS);
-    const Token Lexer::TOK_MORE_OR_EQ(TWO_LIT_DELIM, MORE_OR_EQ);
-    const Token Lexer::TOK_LESS_OR_EQ(TWO_LIT_DELIM, LESS_OR_EQ);
-    const Token Lexer::TOK_NOT_EQ(TWO_LIT_DELIM, NOT_EQ);
-
-    const Token Lexer::TOK_LINE_END(ONE_LIT_DELIM, LINE_DELIM);
-    const Token Lexer::TOK_INPUT_END(ONE_LIT_DELIM, INPUT_END);
-    const Token Lexer::TOK_COMMA(ONE_LIT_DELIM, COMMA);
-
-    const Token Lexer::TOK_KEYWORD_PROGRAM(KEY_WORD, KEY_PROGRAM);
-    const Token Lexer::TOK_KEYWORD_VAR(KEY_WORD, KEY_VAR);
-    const Token Lexer::TOK_KEYWORD_IF(KEY_WORD, KEY_IF);
-    const Token Lexer::TOK_KEYWORD_PRINT(KEY_WORD, KEY_PRINT);
-
-
-
-
-
-
-//const std::shared_ptr<Token> Lexer::TOK_ERROR           (ERROR));
 
 
 /*
  * Инициализация набора ключевых слов
  */
 const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
-        {"var",     Lexer::TOK_KEYWORD_VAR},
-        {"if",      Lexer::TOK_KEYWORD_IF},
-        {"print",   Lexer::TOK_KEYWORD_PRINT},
-        {"program", Lexer::TOK_KEYWORD_PROGRAM},
+        {"var",     {KEYWORD, KEY_VAR}},
+        {"if",      {KEYWORD, KEY_IF}},
+        {"else",    {KEYWORD, KEY_ELSE}},
+        {"print",   {KEYWORD, KEY_PRINT}},
+        {"program", {KEYWORD, KEY_PROGRAM}},
+        {"true",    {KEYWORD, KEY_TRUE}},
+        {"false",   {KEYWORD, KEY_FALSE}}
 };
 
 /**
@@ -101,6 +53,8 @@ Token Lexer::nextToken() {
         more,
         st_not,
         st_string,
+        st_and,
+        st_or,
     };
     last_position = position;
     std::string word;
@@ -130,35 +84,35 @@ Token Lexer::nextToken() {
 
                 switch (ch) {
                     case Lexer::ENDING_CHAR:
-                        return TOK_INPUT_END;
+                        return {ONE_LIT_DELIM, INPUT_END};
                     case ';':
                         position++;
-                        return TOK_LINE_END;
+                        return {ONE_LIT_DELIM, LINESEP};
                     case ',':
                         position++;
-                        return TOK_COMMA;
+                        return {ONE_LIT_DELIM, COMMA};
                     case '"':
                         position++;
                         state = st_string;
                         break;
                     case '(':
                         position++;
-                        return TOK_LPAREN;
+                        return {ONE_LIT_DELIM, LPAREN};
                     case ')':
                         position++;
-                        return TOK_RPAREN;
+                        return {ONE_LIT_DELIM, RPAREN};
                     case '[':
                         position++;
-                        return TOK_LBRACKET;
+                        return {ONE_LIT_DELIM, LBRACKET};
                     case ']':
                         position++;
-                        return TOK_RBRACKET;
+                        return {ONE_LIT_DELIM, RBRACKET};
                     case '{':
                         position++;
-                        return TOK_LBRACE;
+                        return {ONE_LIT_DELIM, LBRACE};
                     case '}':
                         position++;
-                        return TOK_RBRACE;
+                        return {ONE_LIT_DELIM, RBRACE};
 
                     case '*':
                         position++;
@@ -180,9 +134,9 @@ Token Lexer::nextToken() {
                         position++;
                         state = eqOrAssign;
                         break;
-                    case '^':
-                        position++;
-                        return TOK_POW;
+//                    case '^':
+//                        position++;
+//                        return {ONE_LIT_DELIM, POW};
                     case '<':
                         position++;
                         state = less;
@@ -195,6 +149,14 @@ Token Lexer::nextToken() {
                         position++;
                         state = st_not;
                         break;
+                    case '&':
+                        position++;
+                        state = st_and;
+                        break;
+                    case '|':
+                        position++;
+                        state = st_or;
+                        break;
                     default:
                         state = error;
                 }
@@ -206,7 +168,7 @@ Token Lexer::nextToken() {
                     word += ch;
                     position++;
                 } else if (isWhitespace(ch) || isOperator(ch) || ch == ENDING_CHAR || ch == ';') {
-                    return Token(INTEGER, tables->insertInteger(word));
+                    return {INTEGER, tables->insertInteger(word)};
                 } else {
                     state = error;
                 }
@@ -224,7 +186,7 @@ Token Lexer::nextToken() {
                             return it->second;
                         }
                     }
-                    return Token(IDENTIFIER, tables->insertIdentifier(word));
+                    return {IDENTIFIER, tables->insertIdentifier(word)};
                 } else {
                     state = error;
                 }
@@ -240,7 +202,7 @@ Token Lexer::nextToken() {
                     position++;
                 } else {
                     position++;
-                    return Token(LITERAL, tables->insertString(word));
+                    return {LITERAL, tables->insertString(word)};
                 }
                 break;
 
@@ -253,9 +215,9 @@ Token Lexer::nextToken() {
                     state = lineComment;
                 } else if (ch == '=') {
                     position++;
-                    return TOK_DIV_ASSIGN;
+                    return {TWO_LIT_DELIM, DIV_ASSIGN};
                 } else {
-                    return TOK_DIV;
+                    return {ONE_LIT_DELIM, DIV};
                 }
                 break;
 
@@ -291,59 +253,73 @@ Token Lexer::nextToken() {
             case plus:
                 if (ch == '=') {
                     position++;
-                    return TOK_PLUS_ASSIGN;
+                    return {TWO_LIT_DELIM, PLUS_ASSIGN};
                 }
                 if (ch == '+') {
                     position++;
-                    return TOK_INCR;
+                    return {TWO_LIT_DELIM, INCR};
                 }
-                return TOK_PLUS;
+                return {ONE_LIT_DELIM, PLUS};
 
             case min:
                 if (ch == '=') {
                     position++;
-                    return TOK_MINUS_ASSIGN;
+                    return {TWO_LIT_DELIM, MINUS_ASSIGN};
                 }
                 if (ch == '+') {
                     position++;
-                    return TOK_DECR;
+                    return {TWO_LIT_DELIM, DECR};
                 }
-                return TOK_MINUS;
+                return {ONE_LIT_DELIM, MINUS};
 
             case mul:
                 if (ch == '=') {
                     position++;
-                    return TOK_MULT_ASSIGN;
+                    return {TWO_LIT_DELIM, MULT_ASSIGN};
                 }
-                return TOK_MULT;
+                return {ONE_LIT_DELIM, MULT};
 
             case eqOrAssign:
                 if (ch == '=') {
                     position++;
-                    return TOK_EQUALS;
+                    return {TWO_LIT_DELIM, EQUALS};
                 }
-                return TOK_ASSIGN;
+                return {ONE_LIT_DELIM, ASSIGN};
 
             case more:
                 if (ch == '=') {
                     position++;
-                    return TOK_MORE_OR_EQ;
+                    return {TWO_LIT_DELIM, MORE_OR_EQ};
                 }
-                return TOK_MORE;
+                return {ONE_LIT_DELIM, MORE};
 
             case less:
                 if (ch == '=') {
                     position++;
-                    return TOK_LESS_OR_EQ;
+                    return {TWO_LIT_DELIM, LESS_OR_EQ};
                 }
-                return TOK_LESS;
+                return {ONE_LIT_DELIM, LESS};
 
             case st_not:
                 if (ch == '=') {
                     position++;
-                    return TOK_NOT_EQ;
+                    return {TWO_LIT_DELIM, NOT_EQ};
                 }
-                return TOK_NOT;
+                return {ONE_LIT_DELIM, NOT};
+
+            case st_and:
+                if (ch == '&') {
+                    position++;
+                    return Token{TWO_LIT_DELIM, AND};
+                }
+                state = error;
+                break;
+
+            case st_or:
+                if (ch == '|') {
+                    position++;
+                    return Token{TWO_LIT_DELIM, OR};
+                }
 
             case error:
                 while (!(isWhitespace(buffer[position]) || buffer[position] == INPUT_END ||
@@ -453,7 +429,7 @@ int Lexer::getLine() const {
 //        case IDENTIFIER:
 //            id = identifierTokens[index];
 //            break;
-//        case KEY_WORD:
+//        case KEYWORD:
 //            id = keyWordTokens[index];
 //            break;
 //        case BREAKER:
