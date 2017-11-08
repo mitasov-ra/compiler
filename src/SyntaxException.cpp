@@ -38,8 +38,8 @@ void SyntaxException::printError() {
             std::cout << "Неизвестный токен\n";
             break;
 
-        case Errors::END_OF_LINE_MISSING:
-            std::cout << "Нет конца строки\n";
+        case Errors::LINESEP_MISSING:
+            std::cout << "Отсутствует конец строки (';')\n";
             break;
 
         case Errors::OPERATOR_MISSING:
@@ -47,7 +47,47 @@ void SyntaxException::printError() {
             break;
 
         case Errors::OPERAND_MISSING:
-            std::cout << "Ожидалось число или идентификатор\n";
+            std::cout << "Отсутствует операнд\n";
+            break;
+
+        case Errors::CODE_AFTER_END:
+            std::cout << "После конца программы не должно ничего быть\n";
+            break;
+
+        case Errors::KEYWORD_MISSING:
+            std::cout << "Отсутствует ключевое слово\n";
+            break;
+
+        case Errors::IDENTIFIER_MISSING:
+            std::cout << "Отсутствует идентификатор\n";
+            break;
+
+        case Errors::UNEXPECTED_TOKEN:
+            std::cout << "Неожиданный символ\n";
+            break;
+
+        case Errors::LBRACE_MISSING:
+            std::cout << "Отсутствует открывающая фигурная скобка\n";
+            break;
+
+        case Errors::RBRACE_MISSING:
+            std::cout << "Отсутствует закрывающая фигурная скобка\n";
+            break;
+
+        case Errors::LPAREN_MISSING:
+            std::cout << "Отсутствует открывающая скобка\n";
+            break;
+
+        case Errors::RPAREN_MISSING:
+            std::cout << "Отсутствует закрывающая скобка\n";
+            break;
+
+        case Errors::LBRACKET_MISSING:
+            std::cout << "Отсутствует открывающая квадратная скобка\n";
+            break;
+
+        case Errors::RBRACKET_MISSING:
+            std::cout << "Отсутствует закрывающая квадратная скобка\n";
             break;
     }
 

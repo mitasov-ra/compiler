@@ -12,8 +12,19 @@ namespace compiler {
         enum class Errors {
             UNKNOWN_TOKEN,
 
+            UNEXPECTED_TOKEN,
+            LINESEP_MISSING,
+            CODE_AFTER_END,
+            KEYWORD_MISSING,
+            IDENTIFIER_MISSING,
+            LBRACE_MISSING,
+            RBRACE_MISSING,
+            LPAREN_MISSING,
+            RPAREN_MISSING,
+            LBRACKET_MISSING,
+            RBRACKET_MISSING,
+
             OPERAND_MISSING,
-            END_OF_LINE_MISSING,
             OPERATOR_MISSING,
         };
     private:
