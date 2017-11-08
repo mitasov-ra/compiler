@@ -2,7 +2,6 @@
 #include "Lexer.h"
 #include "SyntaxException.h"
 
-#include <memory>
 //#include <iostream>
 
 using namespace compiler;
@@ -13,13 +12,17 @@ using namespace compiler;
  * Инициализация набора ключевых слов
  */
 const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
-        {"var",     {KEYWORD, KEY_VAR}},
-        {"if",      {KEYWORD, KEY_IF}},
-        {"else",    {KEYWORD, KEY_ELSE}},
-        {"print",   {KEYWORD, KEY_PRINT}},
-        {"program", {KEYWORD, KEY_PROGRAM}},
-        {"true",    {KEYWORD, KEY_TRUE}},
-        {"false",   {KEYWORD, KEY_FALSE}}
+        {"var",     {KEY_WORD, KEY_VAR}},
+        {"if",      {KEY_WORD, KEY_IF}},
+        {"then",    {KEY_WORD, KEY_THEN}},
+        {"else",    {KEY_WORD, KEY_ELSE}},
+        {"print",   {KEY_WORD, KEY_PRINT}},
+        {"program", {KEY_WORD, KEY_PROGRAM}},
+        {"true",    {KEY_WORD, KEY_TRUE}},
+        {"false",   {KEY_WORD, KEY_FALSE}},
+        {"array",   {KEY_WORD, KEY_ARRAY}},
+        {"int",     {KEY_WORD, KEY_INT}},
+        {"string",  {KEY_WORD, KEY_STRING}},
 };
 
 /**
@@ -350,6 +353,7 @@ void Lexer::loadLine() {
     std::getline(*fin, buffer);
     buffer += '\n';
     position = 0;
+    last_position = position;
     line++;
     if (fin->eof())
         buffer += ENDING_CHAR;
@@ -408,7 +412,7 @@ int Lexer::getPosition() const {
 }
 
 int Lexer::getLastTokenPosition() const {
-    return last_position;
+    return last_position + 1;
 }
 
 int Lexer::getLine() const {
@@ -429,7 +433,7 @@ int Lexer::getLine() const {
 //        case IDENTIFIER:
 //            id = identifierTokens[index];
 //            break;
-//        case KEYWORD:
+//        case KEY_WORD:
 //            id = keyWordTokens[index];
 //            break;
 //        case BREAKER:

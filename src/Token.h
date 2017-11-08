@@ -13,11 +13,11 @@ namespace compiler {
         int type;
         int id;
 
-        bool operator== (Token t2) {
+        bool operator== (const Token& t2) const noexcept {
             return id == t2.id && type == t2.type;
         }
 
-        bool operator!= (Token t2) {
+        bool operator!= (const Token t2) const noexcept {
             return id != t2.id || type != t2.type;
         }
 

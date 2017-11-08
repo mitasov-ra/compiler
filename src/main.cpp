@@ -18,12 +18,12 @@ string tokenType[] = {
 
 string oneLitDelim[] = {
     "INPUT_END",
-    "LINE_DELIM",
+    "LINESEP",
     "PLUS",
     "MINUS",
     "MULT",
     "DIV",
-    "POW",
+    //"POW",
     "ASSIGN",
     "LPAREN",
     "RPAREN",
@@ -51,11 +51,17 @@ string twoLitDelim[] = {
 };
 
 string keyWord[] = {
-    "KEY_PROGRAM",
-    //    ERROR,
-    "KEY_VAR",
-    "KEY_IF",
-    "KEY_PRINT",
+        "KEY_PROGRAM",
+        "KEY_VAR",
+        "KEY_IF",
+        "KEY_ELSE",
+        "KEY_THEN",
+        "KEY_PRINT",
+        "KEY_TRUE",
+        "KEY_FALSE",
+        "KEY_ARRAY",
+        "KEY_INT",
+        "KEY_STRING",
 };
 
 int main() {
@@ -78,13 +84,14 @@ int main() {
     while(true) {
         try {
             tok = make_shared<Token>(lex.nextToken());
-            if (tok->type == ONE_LIT_DELIM && tok->id == INPUT_END)
-                break;
+
 //            std::cout << "tok = " << tok->type << ' ' << tok->id << std::endl;
             std::cout << tokenType[tok->type];
             switch (tok->type) {
                 case ONE_LIT_DELIM:
                     std::cout << '\t' << oneLitDelim[tok->id];
+                    if (tok->type == ONE_LIT_DELIM && tok->id == INPUT_END)
+                       goto while_end;
                     break;
                 case TWO_LIT_DELIM:
                     std::cout << '\t' << twoLitDelim[tok->id];
@@ -107,11 +114,13 @@ int main() {
         }
         cout << std::endl;
     }
+    while_end:
 
     cout << std::endl;
     cout << std::endl;
 
-    fin.seekg(0);
+    fin.close();
+    fin.open("main.txt");
 
 //    lex = Lexer(fin);
 //    tok = lex.lookForToken();
@@ -211,7 +220,7 @@ int main() {
     Parser parser = Parser(fin, tables);
     try {
         parser.parse("file1");
-        cout << "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!\n";
+        cout << "Успешно!\n";
     } catch (SyntaxException &e) {
         e.printError();
     }

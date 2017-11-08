@@ -8,7 +8,7 @@
 namespace compiler
 {
     /*
-     * РџРµСЂРµС‡РёСЃР»РµРЅРёРµ РІСЃРµС… РІРѕР·РјРѕР¶РЅС‹С… С‚РёРїРѕРІ С‚РѕРєРµРЅРѕРІ
+     * Перечисление всех возможных типов токенов
      */
     enum TokenType {
         KEY_WORD,
@@ -21,12 +21,12 @@ namespace compiler
 
     enum OneLitDelim {
         INPUT_END,
-        LINE_DELIM,
+        LINESEP,
         PLUS,
         MINUS,
         MULT,
         DIV,
-        POW,
+        //POW,
         ASSIGN,
         LPAREN,
         RPAREN,
@@ -47,6 +47,8 @@ namespace compiler
         MULT_ASSIGN,
         INCR,
         DECR,
+        OR,
+        AND,
         EQUALS,
         MORE_OR_EQ,
         LESS_OR_EQ,
@@ -57,7 +59,14 @@ namespace compiler
         KEY_PROGRAM,
         KEY_VAR,
         KEY_IF,
+        KEY_ELSE,
+        KEY_THEN,
         KEY_PRINT,
+        KEY_TRUE,
+        KEY_FALSE,
+        KEY_ARRAY,
+        KEY_INT,
+        KEY_STRING,
     };
 }
 #include "TokenTables.h"
@@ -69,7 +78,6 @@ namespace compiler
 //#include "Lexer.cpp"
 //#include "Parser.cpp"
 //#include "SyntaxException.cpp"
-//#include "Token.cpp"
 //#include "TokenTables.cpp"
 
 
