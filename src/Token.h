@@ -9,26 +9,21 @@
 #include <string>
 namespace compiler {
 
-    class Token {
-    private:
-
-//    std::string* name;
-//    std::string* value;
-    public:
+    struct Token {
         int type;
         int id;
 
+        bool operator== (Token t2) {
+            return id == t2.id && type == t2.type;
+        }
+
+        bool operator!= (Token t2) {
+            return id != t2.id || type != t2.type;
+        }
+
         Token(int t, int p) :
-//      name(nullptr),
-//      value(nullptr),
                 type(t),
                 id(p) {}
-//    void setValue(const std::string &);
-//    void setName(const std::string &);
-//    std::string getValue() const;
-//    std::string getName() const;
-        // int getTokenType() const;
-        //int getToken() const;
     };
 }
 #endif //COMPILER_TOKEN_H
