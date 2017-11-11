@@ -12,7 +12,7 @@ namespace compiler {
         Lexer lexer;
         std::shared_ptr<TokenTables> tables;
 
-        bool followsAssigment(const Token& t) const noexcept;
+        bool followsAssignment(const Token &t) const noexcept;
 
         bool followsOr(const Token& t) const noexcept;
 

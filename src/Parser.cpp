@@ -204,7 +204,7 @@ void Parser::assignment() {
 
     auto tok = lexer.lookForToken();
 
-    while (!followsAssigment(tok)) {
+    while (!followsAssignment(tok)) {
         tok = lexer.nextToken();
 
         if (tok.compare(ONE_LIT_DELIM, ASSIGN)) {
@@ -420,7 +420,7 @@ void Parser::primary_expr() {
 
 }
 
-bool Parser::followsAssigment(const Token &tok) const noexcept {
+bool Parser::followsAssignment(const Token &tok) const noexcept {
     return (tok.type == ONE_LIT_DELIM &&
             tok.id == RPAREN ||
             tok.id == RBRACKET ||
@@ -431,7 +431,7 @@ bool Parser::followsAssigment(const Token &tok) const noexcept {
 }
 
 bool Parser::followsOr(const Token &tok) const noexcept {
-    return followsAssigment(tok) || tok.type == ONE_LIT_DELIM && tok.id == ASSIGN;
+    return followsAssignment(tok) || tok.type == ONE_LIT_DELIM && tok.id == ASSIGN;
 }
 
 bool Parser::followsAnd(const Token &tok) const noexcept {
