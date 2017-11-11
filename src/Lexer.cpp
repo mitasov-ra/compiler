@@ -23,6 +23,10 @@ const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
         {"array",   {KEY_WORD, KEY_ARRAY}},
         {"int",     {KEY_WORD, KEY_INT}},
         {"string",  {KEY_WORD, KEY_STRING}},
+        {"of",      {KEY_WORD, KEY_OF}},
+        {"while",   {KEY_WORD, KEY_WHILE}},
+        {"do",   {KEY_WORD, KEY_DO}},
+      //  {"float",   {KEY_WORD, KEY_FLOAT}},
 };
 
 /**

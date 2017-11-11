@@ -67,6 +67,10 @@ namespace compiler
         KEY_ARRAY,
         KEY_INT,
         KEY_STRING,
+        KEY_OF,
+        KEY_WHILE,
+        KEY_DO,
+       // KEY_FLOAT,
     };
 }
 #include "TokenTables.h"

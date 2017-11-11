@@ -52,7 +52,7 @@ namespace compiler {
 
     public:
 
-        std::shared_ptr<TokenTables> tables = nullptr;
+        std::shared_ptr<TokenTables> tables;
 
         Token nextToken();
 
