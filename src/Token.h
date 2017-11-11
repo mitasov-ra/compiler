@@ -21,9 +21,13 @@ namespace compiler {
             return id != t2.id || type != t2.type;
         }
 
-        Token(int t, int p) :
+        inline bool compare(const int t, const int i) const noexcept {
+            return id == i && type == t;
+        }
+
+        Token(int t, int i) :
                 type(t),
-                id(p) {}
+                id(i) {}
     };
 }
 #endif //COMPILER_TOKEN_H
