@@ -1,26 +1,23 @@
-
-#include "compiler.h"
 #include <iostream>
-
 #include "Parser.h"
-
+#include "compiler.h"
 
 using namespace compiler;
-using errs = SyntaxException::Errors;
+typedef SyntaxException::Errors errs;
 
 void Parser::parse(const std::string &fileName) {
     program();
-    if (lexer.lookForToken() == Token{KEY_WORD, KEY_VAR}) {
+    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
         var();
     }
     block();
-    if (lexer.nextToken() != Token{ONE_LIT_DELIM, INPUT_END})
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, INPUT_END))
         throw SyntaxException(errs::CODE_AFTER_END)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
 }
 
 void Parser::program() {
-    if (lexer.nextToken() != Token{KEY_WORD, KEY_PROGRAM})
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_PROGRAM))
         throw SyntaxException(errs::KEYWORD_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                 .setMessage("program: не найдено начало программы");
@@ -36,24 +33,20 @@ void Parser::program() {
 }
 
 void Parser::var() {
-    if (lexer.nextToken() != Token{KEY_WORD, KEY_VAR}) {
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_VAR)) {
         throw SyntaxException(errs::KEYWORD_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                 .setMessage("Не найден var");
     }
     auto tok = lexer.lookForToken();
     do {
+        if (tok.type == KEY_WORD) {
+            if (tok.id == KEY_ARRAY) {
+                array_type();
+            } else {
+                type();
+            }
 
-        if (tok == Token{KEY_WORD, KEY_ARRAY}) {
-            lexer.nextToken();
-            assignment();
-            line_sep();
-        } else if (tok == Token{KEY_WORD, KEY_INT}) {
-            lexer.nextToken();
-            assignment();
-            line_sep();
-        } else if (tok == Token{KEY_WORD, KEY_STRING}) {
-            lexer.nextToken();
             assignment();
             line_sep();
         } else {
@@ -61,67 +54,126 @@ void Parser::var() {
                     .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                     .setMessage("Пропущен тип переменной");
         }
+
         tok = lexer.lookForToken();
 
-    } while (tok != Token{ONE_LIT_DELIM, LBRACE});
+    } while (!tok.compare(ONE_LIT_DELIM, LBRACE));
+}
+
+void Parser::type() {
+    auto tok = lexer.lookForToken();
+    if (tok.type == KEY_WORD) {
+        switch (tok.id) {
+            case KEY_INT:
+                lexer.nextToken();
+
+                break;
+            case KEY_STRING:
+                lexer.nextToken();
+
+                break;
+            default:
+                goto type_error;
+        }
+    } else {
+        type_error:
+        throw SyntaxException(errs::KEYWORD_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
+                .setMessage("Пропущен тип переменной");
+    }
+}
+
+void Parser::array_type() {
+    lexer.nextToken();
+
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LBRACKET)) {
+        throw SyntaxException(errs::LBRACKET_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
+
+    if (lexer.nextToken().type != INTEGER) {
+        throw SyntaxException(errs::UNEXPECTED_TOKEN)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
+
+    //логика
+
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
+        throw SyntaxException(errs::RBRACKET_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
+
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_OF)) {
+        throw SyntaxException(errs::KEYWORD_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
+                .setMessage("Не найдено of");
+    }
+
+    type();
 }
 
 void Parser::block() {
-    if (lexer.nextToken() != Token{ONE_LIT_DELIM, LBRACE}) {
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LBRACE)) {
         throw SyntaxException(errs::LBRACE_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
     }
 
+    statement();
+
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACE)) {
+        throw SyntaxException(errs::RBRACE_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
+}
+
+void Parser::statement() {
     auto tok = lexer.lookForToken();
-    while (tok != Token{ONE_LIT_DELIM, RBRACE}) {
-        if (tok.type == IDENTIFIER || tok == Token{ONE_LIT_DELIM, LPAREN}) {
+    while (!tok.compare(ONE_LIT_DELIM, RBRACE)) {
+        if (tok.type == IDENTIFIER || tok.compare(ONE_LIT_DELIM, LPAREN)) {
             assignment();
-            tok = lexer.lookForToken();
             line_sep();
-        } else if (tok == Token{KEY_WORD, KEY_IF}) {
-            lexer.nextToken();
+        } else if (tok.compare(KEY_WORD, KEY_IF)) {
+
             if_statement();
 
-        } else if (tok == Token{KEY_WORD, KEY_PRINT}) {
-            lexer.nextToken();
+        } else if (tok.compare(KEY_WORD, KEY_PRINT)) {
+
             print_statement();
 
+        } else if (tok.compare(KEY_WORD, KEY_WHILE)) {
+            while_statement();
         } else {
             throw SyntaxException(errs::UNEXPECTED_TOKEN)
                     .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
         }
         tok = lexer.lookForToken();
     }
-
-    if (lexer.nextToken() != Token{ONE_LIT_DELIM, RBRACE}) {
-        throw SyntaxException(errs::RBRACE_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-    }
 }
 
 void Parser::line_sep() {
-    if (lexer.nextToken() != Token{ONE_LIT_DELIM, LINESEP})
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LINESEP))
         throw SyntaxException(errs::LINESEP_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
 }
 
 void Parser::if_statement() {
+    lexer.nextToken();
     assignment();
     auto tok = lexer.nextToken();
-    if (tok != Token{KEY_WORD, KEY_THEN}) {
+    if (!tok.compare(KEY_WORD, KEY_THEN)) {
         throw SyntaxException(errs::KEYWORD_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                 .setMessage("Пропущен then");
     }
     block();
-    if (lexer.lookForToken() == Token{KEY_WORD, KEY_ELSE}) {
+    if (lexer.lookForToken().compare(KEY_WORD, KEY_ELSE)) {
         lexer.nextToken();
         else_statement();
     }
 }
 
 void Parser::else_statement() {
-    if (lexer.lookForToken() == Token{KEY_WORD, KEY_IF}) {
+    if (lexer.lookForToken().compare(KEY_WORD, KEY_IF)) {
         lexer.nextToken();
         if_statement();
     } else {
@@ -129,7 +181,19 @@ void Parser::else_statement() {
     }
 }
 
+void Parser::while_statement() {
+    lexer.nextToken();
+    assignment();
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_DO)) {
+        throw SyntaxException(errs::KEYWORD_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
+                .setMessage("Пропущен do");
+    }
+    block();
+}
+
 void Parser::print_statement() {
+    lexer.nextToken();
     assignment();
     line_sep();
 }
@@ -143,7 +207,7 @@ void Parser::assignment() {
     while (!followsAssigment(tok)) {
         tok = lexer.nextToken();
 
-        if (tok == Token{ONE_LIT_DELIM, ASSIGN}) {
+        if (tok.compare(ONE_LIT_DELIM, ASSIGN)) {
             or_expr();
 
         } else {
@@ -161,7 +225,7 @@ void Parser::or_expr() {
     Token tok = lexer.lookForToken();
     while (!followsOr(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{ONE_LIT_DELIM, OR}) {
+        if (tok.compare(TWO_LIT_DELIM, OR)) {
             and_expr();
 
         } else {
@@ -178,7 +242,7 @@ void Parser::and_expr() {
     Token tok = lexer.lookForToken();
     while (!followsAnd(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{ONE_LIT_DELIM, AND}) {
+        if (tok.compare(TWO_LIT_DELIM, AND)) {
             equation();
 
         } else {
@@ -194,13 +258,13 @@ void Parser::equation() {
     relation();
 
     auto tok = lexer.lookForToken();
-    while (!followsEquation(tok)) {
+    if (!followsEquation(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{TWO_LIT_DELIM, EQUALS}) {
+        if (tok.compare(TWO_LIT_DELIM, EQUALS)) {
             relation();
 
 
-        } else if (tok == Token{TWO_LIT_DELIM, NOT_EQ}) {
+        } else if (tok.compare(TWO_LIT_DELIM, NOT_EQ)) {
             relation();
 
 
@@ -209,7 +273,7 @@ void Parser::equation() {
                     .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                     .setMessage("eq");
         }
-        tok = lexer.lookForToken();
+
     }
 }
 
@@ -217,18 +281,18 @@ void Parser::relation() {
     add_expr();
 
     auto tok = lexer.lookForToken();
-    while (!followsRelation(tok)) {
+    if (!followsRelation(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{ONE_LIT_DELIM, MORE}) {
+        if (tok.compare(ONE_LIT_DELIM, MORE)) {
             add_expr();
 
-        } else if (tok == Token{ONE_LIT_DELIM, LESS}) {
+        } else if (tok.compare(ONE_LIT_DELIM, LESS)) {
             add_expr();
 
-        } else if (tok == Token{TWO_LIT_DELIM, LESS_OR_EQ}) {
+        } else if (tok.compare(TWO_LIT_DELIM, LESS_OR_EQ)) {
             add_expr();
 
-        } else if (tok == Token{TWO_LIT_DELIM, MORE_OR_EQ}) {
+        } else if (tok.compare(TWO_LIT_DELIM, MORE_OR_EQ)) {
             add_expr();
 
         } else {
@@ -236,7 +300,6 @@ void Parser::relation() {
                     .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                     .setMessage("rel");
         }
-        tok = lexer.lookForToken();
     }
 }
 
@@ -245,10 +308,10 @@ void Parser::add_expr() {
     Token tok = lexer.lookForToken();
     while (!followsAdd(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{ONE_LIT_DELIM, PLUS}) {
+        if (tok.compare(ONE_LIT_DELIM, PLUS)) {
             mul_expr();
 
-        } else if (tok == Token{ONE_LIT_DELIM, MINUS}) {
+        } else if (tok.compare(ONE_LIT_DELIM, MINUS)) {
             mul_expr();
 
         } else {
@@ -265,10 +328,10 @@ void Parser::mul_expr() {
     auto tok = lexer.lookForToken();
     while (!followsMul(tok)) {
         tok = lexer.nextToken();
-        if (tok == Token{ONE_LIT_DELIM, DIV}) {
+        if (tok.compare(ONE_LIT_DELIM, DIV)) {
             primary_expr();
 
-        } else if (tok == Token{ONE_LIT_DELIM, MULT}) {
+        } else if (tok.compare(ONE_LIT_DELIM, MULT)) {
             primary_expr();
 
         } else {
@@ -282,13 +345,13 @@ void Parser::mul_expr() {
 
 void Parser::unary_expr() {
     auto tok = lexer.lookForToken();
-    if (tok == Token{ONE_LIT_DELIM, MINUS}) {
+    if (tok.compare(ONE_LIT_DELIM, MINUS)) {
         lexer.nextToken();
-    } else if (tok == Token{ONE_LIT_DELIM, NOT}) {
+    } else if (tok.compare(ONE_LIT_DELIM, NOT)) {
 
-    } else if (tok == Token{TWO_LIT_DELIM, INCR}) {
+    } else if (tok.compare(TWO_LIT_DELIM, INCR)) {
 
-    } else if (tok == Token{TWO_LIT_DELIM, DECR}) {
+    } else if (tok.compare(TWO_LIT_DELIM, DECR)) {
 
     }
 
@@ -299,17 +362,14 @@ void Parser::postfix_expr() {
     primary_expr();
     auto tok = lexer.lookForToken();
     while (!followsPostfixExpr(tok)) {
-        if (tok == Token{ONE_LIT_DELIM, LBRACKET}) {
+        if (tok.compare(ONE_LIT_DELIM, LBRACKET)) {
             lexer.nextToken();
             assignment();
-            if (lexer.nextToken() != Token{ONE_LIT_DELIM, RBRACKET}) {
+            if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
                 throw SyntaxException(errs::RBRACKET_MISSING)
                         .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
             }
-        }
-
-
-        else {
+        } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                     .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
                     .setMessage("post_e");
@@ -319,16 +379,15 @@ void Parser::postfix_expr() {
 }
 
 
-
 void Parser::primary_expr() {
     auto tok = lexer.nextToken();
 
-    if (tok == Token{KEY_WORD, KEY_TRUE}) {
+    if (tok.compare(KEY_WORD, KEY_TRUE)) {
 
         return;
     }
 
-    if (tok == Token{KEY_WORD, KEY_FALSE}) {
+    if (tok.compare(KEY_WORD, KEY_FALSE)) {
 
         return;
     }
@@ -366,7 +425,9 @@ bool Parser::followsAssigment(const Token &tok) const noexcept {
             tok.id == RPAREN ||
             tok.id == RBRACKET ||
             tok.id == LINESEP) ||
-           tok == Token{KEY_WORD, KEY_THEN};
+           (tok.type == KEY_WORD &&
+            tok.id == KEY_THEN ||
+            tok.id == KEY_DO);
 }
 
 bool Parser::followsOr(const Token &tok) const noexcept {
@@ -374,11 +435,11 @@ bool Parser::followsOr(const Token &tok) const noexcept {
 }
 
 bool Parser::followsAnd(const Token &tok) const noexcept {
-    return followsOr(tok) || tok.type == ONE_LIT_DELIM && tok.id == OR;
+    return followsOr(tok) || (tok.type == TWO_LIT_DELIM && tok.id == OR);
 }
 
 bool Parser::followsEquation(const Token &tok) const noexcept {
-    return followsAnd(tok) || tok.type == ONE_LIT_DELIM && tok.id == AND;
+    return followsAnd(tok) || tok.type == TWO_LIT_DELIM && tok.id == AND;
 }
 
 bool Parser::followsRelation(const Token &tok) const noexcept {
@@ -397,5 +458,3 @@ bool Parser::followsMul(const Token &tok) const noexcept {
 bool Parser::followsPostfixExpr(const Token &tok) const noexcept {
     return followsMul(tok);
 }
-
-

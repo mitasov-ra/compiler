@@ -33,12 +33,20 @@ namespace compiler {
         void program();
 
         void var();
+        
+        void type();
+        
+        void array_type();
 
         void block();
+        
+        void statement();
 
         void if_statement();
 
         void else_statement();
+        
+        void while_statement();
 
         void print_statement();
 
