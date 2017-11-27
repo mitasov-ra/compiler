@@ -8,68 +8,68 @@ using namespace std;
 using namespace compiler;
 
 string tokenType[] = {
-        "KEY_WORD",
-        "ONE_LIT_DELIM",
-        "TWO_LIT_DELIM",
-        "INTEGER",
-        "IDENTIFIER",
-        "LITERAL",
+    "KEY_WORD",
+    "ONE_LIT_DELIM",
+    "TWO_LIT_DELIM",
+    "INTEGER",
+    "IDENTIFIER",
+    "LITERAL",
 };
 
 string oneLitDelim[] = {
-        "INPUT_END",
-        "LINESEP",
-        "PLUS",
-        "MINUS",
-        "MULT",
-        "DIV",
-        //"POW",
-        "ASSIGN",
-        "LPAREN",
-        "RPAREN",
-        "LBRACKET",
-        "RBRACKET",
-        "LBRACE",
-        "RBRACE",
-        "MORE",
-        "LESS",
-        "NOT",
-        "COMMA",
-        "EXPR_SEP",
+    "INPUT_END",
+    "LINESEP",
+    "PLUS",
+    "MINUS",
+    "MULT",
+    "DIV",
+    //"POW",
+    "ASSIGN",
+    "LPAREN",
+    "RPAREN",
+    "LBRACKET",
+    "RBRACKET",
+    "LBRACE",
+    "RBRACE",
+    "MORE",
+    "LESS",
+    "NOT",
+    "COMMA",
+    "EXPR_SEP",
 };
 
 string twoLitDelim[] = {
-        "PLUS_ASSIGN",
-        "MINUS_ASSIGN",
-        "DIV_ASSIGN",
-        "MULT_ASSIGN",
-        "INCR",
-        "DECR",
-        "OR",
-        "AND",
-        "EQUALS",
-        "MORE_OR_EQ",
-        "LESS_OR_EQ",
-        "NOT_EQ",
+    "PLUS_ASSIGN",
+    "MINUS_ASSIGN",
+    "DIV_ASSIGN",
+    "MULT_ASSIGN",
+    "INCR",
+    "DECR",
+    "OR",
+    "AND",
+    "EQUALS",
+    "MORE_OR_EQ",
+    "LESS_OR_EQ",
+    "NOT_EQ",
 };
 
 string keyWord[] = {
-        "KEY_PROGRAM",
-        "KEY_VAR",
-        "KEY_IF",
-        "KEY_ELSE",
-        "KEY_THEN",
-        "KEY_PRINT",
-        "KEY_READ",
-        "KEY_TRUE",
-        "KEY_FALSE",
-        "KEY_ARRAY",
-        "KEY_INT",
-        "KEY_STRING",
-        "KEY_OF",
-        "KEY_WHILE",
-        "KEY_DO",
-        //  "KEY_FLOAT",
+    "KEY_PROGRAM",
+    "KEY_VAR",
+    "KEY_IF",
+    "KEY_ELSE",
+    "KEY_THEN",
+    "KEY_PRINT",
+    "KEY_READ",
+    "KEY_TRUE",
+    "KEY_FALSE",
+    "KEY_ARRAY",
+    "KEY_INT",
+    "KEY_STRING",
+    "KEY_OF",
+    "KEY_WHILE",
+    "KEY_DO",
+    //  "KEY_FLOAT",
 
 //        "KEY_AND",
 //        "KEY_BEGIN",
@@ -99,7 +99,8 @@ string keyWord[] = {
 //        "KEY_TYPE",
 };
 
-int main() {
+int main()
+{
     setlocale(LC_ALL, "rus");
 
     ifstream fin;
@@ -130,26 +131,27 @@ int main() {
 //            std::cout << "tok = " << tok->type << ' ' << tok->id << std::endl;
             std::cout << tokenType[tok->type];
             switch (tok->type) {
-                case ONE_LIT_DELIM:
-                    std::cout << '\t' << oneLitDelim[tok->id];
-                    if (tok->type == ONE_LIT_DELIM && tok->id == INPUT_END)
-                        goto while_end;
-                    break;
-                case TWO_LIT_DELIM:
-                    std::cout << '\t' << twoLitDelim[tok->id];
-                    break;
-                case KEY_WORD:
-                    std::cout << '\t' << keyWord[tok->id];
-                    break;
-                case INTEGER:
-                    std::cout << "\t\t" << tok->id << "\t`" << tables->integers[tok->id] << '`';
-                    break;
-                case IDENTIFIER:
-                    std::cout << '\t' << tok->id << "\t`" << tables->identifiers[tok->id] << '`';
-                    break;
-                case LITERAL:
-                    std::cout << "\t\t" << tok->id << "\t\"" << tables->literals[tok->id] << '"';
-                    break;
+            case ONE_LIT_DELIM:
+                std::cout << '\t' << oneLitDelim[tok->id];
+                if (tok->type == ONE_LIT_DELIM && tok->id == INPUT_END) {
+                    goto while_end;
+                }
+                break;
+            case TWO_LIT_DELIM:
+                std::cout << '\t' << twoLitDelim[tok->id];
+                break;
+            case KEY_WORD:
+                std::cout << '\t' << keyWord[tok->id];
+                break;
+            case INTEGER:
+                std::cout << "\t\t" << tok->id << "\t`" << tables->integers[tok->id] << '`';
+                break;
+            case IDENTIFIER:
+                std::cout << '\t' << tok->id << "\t`" << tables->identifiers[tok->id] << '`';
+                break;
+            case LITERAL:
+                std::cout << "\t\t" << tok->id << "\t\"" << tables->literals[tok->id] << '"';
+                break;
             }
         } catch (SyntaxException &e) {
             e.printError();

@@ -7,27 +7,33 @@
 
 
 #include <string>
-namespace compiler {
 
-    struct Token {
+namespace compiler
+{
+
+    struct Token
+    {
         int type;
         int id;
 
-        bool operator== (const Token& t2) const noexcept {
+        bool operator==(const Token &t2) const noexcept
+        {
             return id == t2.id && type == t2.type;
         }
 
-        bool operator!= (const Token t2) const noexcept {
+        bool operator!=(const Token t2) const noexcept
+        {
             return id != t2.id || type != t2.type;
         }
 
-        inline bool compare(const int t, const int i) const noexcept {
+        inline bool compare(const int t, const int i) const noexcept
+        {
             return id == i && type == t;
         }
 
         Token(int t, int i) :
-                type(t),
-                id(i) {}
+            type(t),
+            id(i) {}
     };
 }
 #endif //COMPILER_TOKEN_H

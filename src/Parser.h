@@ -1,28 +1,31 @@
 #ifndef COMPILER_PARSER_H
 #define COMPILER_PARSER_H
+
 #include <iosfwd>
 #include <utility>
 
 #include "Lexer.h"
 #include "TokenTables.h"
 
-namespace compiler {
-    class Parser {
+namespace compiler
+{
+    class Parser
+    {
     private:
         Lexer lexer;
         std::shared_ptr<TokenTables> tables;
 
-        bool followsOr(const Token& t) const noexcept;
+        bool followsOr(const Token &t) const noexcept;
 
-        bool followsAnd(const Token& t) const noexcept;
+        bool followsAnd(const Token &t) const noexcept;
 
-        bool followsEquation(const Token& t) const noexcept;
+        bool followsEquation(const Token &t) const noexcept;
 
-        bool followsRelation(const Token& t) const noexcept;
+        bool followsRelation(const Token &t) const noexcept;
 
-        bool followsAdd(const Token& t) const noexcept;
+        bool followsAdd(const Token &t) const noexcept;
 
-        bool followsMul(const Token& t) const noexcept;
+        bool followsMul(const Token &t) const noexcept;
 
         bool followsPostfixExpr(const Token &tok) const noexcept;
 
@@ -31,23 +34,23 @@ namespace compiler {
         void program();
 
         void var();
-        
+
         void type();
-        
+
         void array_type();
 
         void block();
-        
+
         void statement();
 
         void if_statement();
 
         void else_statement();
-        
+
         void while_statement();
 
         void print_statement();
-        
+
         void read_statement();
 
         void assignment();
@@ -78,14 +81,12 @@ namespace compiler {
         void parse(const std::string &);
 
         Parser(const std::string &str, const std::shared_ptr<TokenTables> &tables) :
-                tables(tables),
-                lexer(str, tables)
-        {}
+            tables(tables),
+            lexer(str, tables) {}
 
         Parser(std::istream &sin, const std::shared_ptr<TokenTables> &tables) :
-                tables(tables),
-                lexer(sin, tables)
-        {}
+            tables(tables),
+            lexer(sin, tables) {}
 
 
     };

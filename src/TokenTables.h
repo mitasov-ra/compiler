@@ -9,11 +9,12 @@
 #include <vector>
 #include <string>
 
-class TokenTables {
+class TokenTables
+{
 public:
-    std::vector<std::string>    identifiers;
-    std::vector<int>            integers;
-    std::vector<std::string>    literals;
+    std::vector<std::string> identifiers;
+    std::vector<int> integers;
+    std::vector<std::string> literals;
 
     int insertIdentifier(std::string &s);
 

@@ -8,8 +8,10 @@
 #include "Token.h"
 #include "TokenTables.h"
 
-namespace compiler {
-    class Lexer {
+namespace compiler
+{
+    class Lexer
+    {
     private:
         /*
          * Буферная строка
@@ -33,14 +35,14 @@ namespace compiler {
         std::shared_ptr<Token> foundToken;
 
         void loadLine();
-        
-		bool isNumeric(char ch);
-		
-		bool isLetter(char ch);
-		
-		bool isWhitespace(char ch);
-		
-		bool isOperator(char ch);
+
+        bool isNumeric(char ch);
+
+        bool isLetter(char ch);
+
+        bool isWhitespace(char ch);
+
+        bool isOperator(char ch);
 
     public:
 
@@ -51,14 +53,16 @@ namespace compiler {
         Token lookForToken();
 
         int getPosition() const;
+
         int getLastTokenPosition() const;
+
         int getLine() const;
 //    void scan(std::vector<std::shared_ptr<Token>>& vect);
 
 
-        Lexer(const std::string &str, const std::shared_ptr<TokenTables>& tables);
+        Lexer(const std::string &str, const std::shared_ptr<TokenTables> &tables);
 
-        Lexer(std::istream &fin, const std::shared_ptr<TokenTables>& tables);
+        Lexer(std::istream &fin, const std::shared_ptr<TokenTables> &tables);
 
 //    void initString(const std::string &str);
 //    void initStream(std::istream &fin);

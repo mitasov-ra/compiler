@@ -5,11 +5,13 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-namespace compiler {
+namespace compiler
+{
     /*
      * Перечисление всех возможных типов токенов
      */
-    enum TokenType {
+    enum TokenType
+    {
         KEY_WORD,
         ONE_LIT_DELIM,
         TWO_LIT_DELIM,
@@ -18,7 +20,8 @@ namespace compiler {
         LITERAL,
     };
 
-    enum OneLitDelim {
+    enum OneLitDelim
+    {
         INPUT_END,
         LINESEP,
         PLUS,
@@ -26,7 +29,7 @@ namespace compiler {
         MULT,
         DIV,
         //POW,
-        ASSIGN,
+            ASSIGN,
         LPAREN,
         RPAREN,
         LBRACKET,
@@ -40,7 +43,8 @@ namespace compiler {
         EXPR_SEP,
     };
 
-    enum TwoLitDelim {
+    enum TwoLitDelim
+    {
         PLUS_ASSIGN,
         MINUS_ASSIGN,
         DIV_ASSIGN,
@@ -55,7 +59,8 @@ namespace compiler {
         NOT_EQ,
     };
 
-    enum KeyWord {
+    enum KeyWord
+    {
         KEY_PROGRAM,
         KEY_VAR,
         KEY_IF,

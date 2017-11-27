@@ -71,13 +71,16 @@ void Parser::type()
     auto tok = lexer.lookForToken();
     if (tok.type == KEY_WORD) {
         switch (tok.id) {
-        case KEY_INT:lexer.nextToken();
+        case KEY_INT:
+            lexer.nextToken();
 
             break;
-        case KEY_STRING:lexer.nextToken();
+        case KEY_STRING:
+            lexer.nextToken();
 
             break;
-        default:goto type_error;
+        default:
+            goto type_error;
         }
     } else {
         type_error:
