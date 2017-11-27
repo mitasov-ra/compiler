@@ -12,8 +12,6 @@ namespace compiler {
         Lexer lexer;
         std::shared_ptr<TokenTables> tables;
 
-        bool followsAssignment(const Token &t) const noexcept;
-
         bool followsOr(const Token& t) const noexcept;
 
         bool followsAnd(const Token& t) const noexcept;
@@ -49,6 +47,8 @@ namespace compiler {
         void while_statement();
 
         void print_statement();
+        
+        void read_statement();
 
         void assignment();
 
@@ -64,11 +64,15 @@ namespace compiler {
 
         void mul_expr();
 
-        void unary_expr();
+        void l_unary_expr();
+
+        void m_unary_expr();
 
         void postfix_expr();
 
-        void primary_expr();
+        void l_primary_expr();
+
+        void m_primary_expr();
 
     public:
         void parse(const std::string &);

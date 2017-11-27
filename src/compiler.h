@@ -5,8 +5,7 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-namespace compiler
-{
+namespace compiler {
     /*
      * Перечисление всех возможных типов токенов
      */
@@ -38,6 +37,7 @@ namespace compiler
         LESS,
         NOT,
         COMMA,
+        EXPR_SEP,
     };
 
     enum TwoLitDelim {
@@ -62,6 +62,7 @@ namespace compiler
         KEY_ELSE,
         KEY_THEN,
         KEY_PRINT,
+        KEY_READ,
         KEY_TRUE,
         KEY_FALSE,
         KEY_ARRAY,
@@ -70,7 +71,7 @@ namespace compiler
         KEY_OF,
         KEY_WHILE,
         KEY_DO,
-       // KEY_FLOAT,
+//         KEY_FLOAT,
 
 //        KEY_AND,
 //        KEY_BEGIN,
@@ -100,6 +101,7 @@ namespace compiler
 //        KEY_TYPE,
     };
 }
+
 #include "TokenTables.h"
 #include "Lexer.h"
 #include "Parser.h"

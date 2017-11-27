@@ -35,6 +35,7 @@ string oneLitDelim[] = {
         "LESS",
         "NOT",
         "COMMA",
+        "EXPR_SEP",
 };
 
 string twoLitDelim[] = {
@@ -59,6 +60,7 @@ string keyWord[] = {
         "KEY_ELSE",
         "KEY_THEN",
         "KEY_PRINT",
+        "KEY_READ",
         "KEY_TRUE",
         "KEY_FALSE",
         "KEY_ARRAY",
@@ -113,7 +115,7 @@ int main() {
         return 0;
     }
 
-    cout << "‘айл найден, результат компил§ции:" << endl;
+    cout << "‘айл найден, результат компил€ции:" << endl;
 
 
     auto tables = make_shared<TokenTables>();

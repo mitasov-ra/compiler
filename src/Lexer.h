@@ -33,22 +33,14 @@ namespace compiler {
         std::shared_ptr<Token> foundToken;
 
         void loadLine();
-
-        inline bool isNumeric(char ch) {
-            return ch >= '0' && ch <= '9';
-        }
-
-        inline bool isLetter(char ch) {
-            return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
-        }
-
-        inline bool isWhitespace(char ch) {
-            return ((std::string) "\r\n\t ").find(ch) != -1;
-        }
-
-        inline bool isOperator(char ch) {
-            return ((std::string) "=+-*/^()[]{}<>").find(ch) != -1;
-        }
+        
+		bool isNumeric(char ch);
+		
+		bool isLetter(char ch);
+		
+		bool isWhitespace(char ch);
+		
+		bool isOperator(char ch);
 
     public:
 

@@ -89,6 +89,10 @@ void SyntaxException::printError() {
         case Errors::RBRACKET_MISSING:
             std::cout << "Отсутствует закрывающая квадратная скобка\n";
             break;
+
+        case Errors::EXPR_SEP_MISSING:
+            std::cout << "Отсутствует '|'\n";
+            break;
     }
 
     if (!errorMessage.empty()) {

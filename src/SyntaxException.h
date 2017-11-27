@@ -6,10 +6,14 @@
 #define COMPILER_SYNTAXEXCEPTION_H
 
 #include <string>
-namespace compiler {
-    class SyntaxException {
+
+namespace compiler
+{
+    class SyntaxException
+    {
     public:
-        enum class Errors {
+        enum class Errors
+        {
             UNKNOWN_TOKEN,
 
             UNEXPECTED_TOKEN,
@@ -23,6 +27,7 @@ namespace compiler {
             RPAREN_MISSING,
             LBRACKET_MISSING,
             RBRACKET_MISSING,
+            EXPR_SEP_MISSING,
 
             OPERAND_MISSING,
             OPERATOR_MISSING,
@@ -35,9 +40,13 @@ namespace compiler {
         Errors errorId;
     public:
         explicit SyntaxException(Errors err);
-        SyntaxException setMessage(const std::string& message);
+
+        SyntaxException setMessage(const std::string &message);
+
         SyntaxException setLineAndPos(int line, int pos);
+
         std::string getErrorMessage() const;
+
         void printError();
     };
 }

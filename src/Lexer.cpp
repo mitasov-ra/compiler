@@ -7,7 +7,6 @@
 using namespace compiler;
 
 
-
 /*
  * Инициализация набора ключевых слов
  */
@@ -25,8 +24,8 @@ const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
         {"string",  {KEY_WORD, KEY_STRING}},
         {"of",      {KEY_WORD, KEY_OF}},
         {"while",   {KEY_WORD, KEY_WHILE}},
-        {"do",   {KEY_WORD, KEY_DO}},
-      //  {"float",   {KEY_WORD, KEY_FLOAT}},
+        {"do",      {KEY_WORD, KEY_DO}},
+        {"read",    {KEY_WORD, KEY_READ}},
 
 //        {"and",   {KEY_WORD, KEY_AND}},
 //        {"begin",   {KEY_WORD, KEY_BEGIN}},
@@ -55,6 +54,22 @@ const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
 //        {"to",   {KEY_WORD, KEY_TO}},
 //        {"type",   {KEY_WORD, KEY_TYPE}},
 };
+
+bool Lexer::isNumeric(char ch) {
+    return ch >= '0' && ch <= '9';
+}
+
+bool Lexer::isLetter(char ch) {
+    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
+}
+
+bool Lexer::isWhitespace(char ch) {
+    return ((std::string) "\r\n\t ").find(ch) != -1;
+}
+
+bool Lexer::isOperator(char ch) {
+    return ((std::string) ",=+-*/^\()[]{}<>|&").find(ch) != -1;
+}
 
 /**
 * Функция возвращает указатель на
@@ -354,7 +369,7 @@ Token Lexer::nextToken() {
                     position++;
                     return Token{TWO_LIT_DELIM, OR};
                 }
-
+                return Token{ONE_LIT_DELIM, EXPR_SEP};
             case error:
                 while (!(isWhitespace(buffer[position]) || buffer[position] == INPUT_END ||
                          isOperator(buffer[position]))) //|| isOperator(buffer[position]))
@@ -411,23 +426,20 @@ void Lexer::loadLine() {
 //    } while (!(tok->getTokenType() == ONE_LIT_DELIM && tok->getToken() == INPUT_END));
 //}
 
-Lexer::Lexer(const std::string &str, const std::shared_ptr<TokenTables>& tables) :
-    buffer (str),
-    position (0),
-    line(1),
-    tables (tables)
-{
+Lexer::Lexer(const std::string &str, const std::shared_ptr<TokenTables> &tables) :
+        buffer(str),
+        position(0),
+        line(1),
+        tables(tables) {
     buffer += ENDING_CHAR;
 }
 
-Lexer::Lexer(std::istream &fin, const std::shared_ptr<TokenTables>& tables) :
-    fin (&fin),
-    tables (tables),
-    line(0)
-{
+Lexer::Lexer(std::istream &fin, const std::shared_ptr<TokenTables> &tables) :
+        fin(&fin),
+        tables(tables),
+        line(0) {
     loadLine();
 }
-
 
 
 Token Lexer::lookForToken() {
