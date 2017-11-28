@@ -170,7 +170,12 @@ void Parser::line_sep()
 void Parser::if_statement()
 {
     lexer.nextToken();
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LPAREN)) {
+        throw SyntaxException(errs::LPAREN_MISSING)
+            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
     or_expr();
+    lexer.nextToken();
     auto tok = lexer.nextToken();
     if (!tok.compare(KEY_WORD, KEY_THEN)) {
         throw SyntaxException(errs::KEYWORD_MISSING)
@@ -196,7 +201,12 @@ void Parser::else_statement()
 void Parser::while_statement()
 {
     lexer.nextToken();
+    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LPAREN)) {
+        throw SyntaxException(errs::LPAREN_MISSING)
+            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+    }
     or_expr();
+    lexer.nextToken();
     if (!lexer.nextToken().compare(KEY_WORD, KEY_DO)) {
         throw SyntaxException(errs::KEYWORD_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
