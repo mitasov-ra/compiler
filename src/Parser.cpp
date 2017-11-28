@@ -218,36 +218,11 @@ void Parser::while_statement()
 void Parser::print_statement()
 {
     lexer.nextToken();
-    if (lexer.lookForToken().type == LITERAL) {
-        lexer.nextToken();
-    } else {
-        add_expr();
-    }
-    line_sep();
-}
-
-void Parser::read_statement()
-{
-    lexer.nextToken();
     while (true) {
-        if (lexer.nextToken().type == IDENTIFIER) {
-
-        }
-
-        if (lexer.lookForToken().compare(ONE_LIT_DELIM, LBRACKET)) {
+        if (lexer.lookForToken().type == LITERAL) {
             lexer.nextToken();
-            Token tok = lexer.nextToken();
-            if (tok.type != INTEGER && tok.type != IDENTIFIER) {
-                throw SyntaxException(errs::UNEXPECTED_TOKEN)
-                    .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-            }
-
-            //логика
-
-            if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
-                throw SyntaxException(errs::RBRACKET_MISSING)
-                    .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-            }
+        } else {
+            add_expr();
         }
 
         if (lexer.lookForToken().compare(ONE_LIT_DELIM, COMMA)) {
@@ -257,6 +232,33 @@ void Parser::read_statement()
             break;
         }
     }
+}
+
+void Parser::read_statement()
+{
+    lexer.nextToken();
+    Token tok = lexer.nextToken();
+    if (tok.type == IDENTIFIER) {
+
+    }
+
+    if (lexer.lookForToken().compare(ONE_LIT_DELIM, LBRACKET)) {
+        lexer.nextToken();
+        tok = lexer.nextToken();
+        if (tok.type != INTEGER && tok.type != IDENTIFIER) {
+            throw SyntaxException(errs::UNEXPECTED_TOKEN)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+        }
+
+        //логика
+
+        if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
+            throw SyntaxException(errs::RBRACKET_MISSING)
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+        }
+    }
+
+    line_sep();
 }
 
 void Parser::assignment()
@@ -524,8 +526,7 @@ void Parser::m_primary_expr()
 
 bool Parser::followsOr(const Token &tok) const noexcept
 {
-    return (tok.type == ONE_LIT_DELIM && tok.id == RPAREN || tok.id == LINESEP) ||
-        (tok.type == KEY_WORD && tok.id == KEY_DO || tok.id == KEY_THEN);
+    return (tok.type == ONE_LIT_DELIM && tok.id == RPAREN || tok.id == LINESEP || tok.id == COMMA);
 }
 
 bool Parser::followsAnd(const Token &tok) const noexcept

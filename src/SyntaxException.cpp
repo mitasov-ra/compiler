@@ -47,7 +47,7 @@ void SyntaxException::printError()
         break;
 
     case Errors::OPERATOR_MISSING:
-        std::cout << "Требуется оператор или конец строки\n";
+        std::cout << "Требуется оператор или конец выражения\n";
         break;
 
     case Errors::OPERAND_MISSING:
