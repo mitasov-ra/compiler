@@ -272,8 +272,8 @@ void Parser::assignment()
         or_expr();
     } else {
         throw SyntaxException(errs::OPERATOR_MISSING)
-            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-            .setMessage("assignment");
+            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//            .setMessage("assignment");
     }
 }
 
@@ -289,8 +289,8 @@ void Parser::or_expr()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("or");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("or");
         }
         tok = lexer.lookForToken();
     }
@@ -307,8 +307,8 @@ void Parser::and_expr()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("and");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+                //.setMessage("and");
         }
         tok = lexer.lookForToken();
     }
@@ -331,8 +331,8 @@ void Parser::equation()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("eq");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("eq");
         }
 
     }
@@ -359,8 +359,8 @@ void Parser::relation()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("rel");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("rel");
         }
     }
 }
@@ -379,8 +379,8 @@ void Parser::add_expr()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("add");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("add");
         }
         tok = lexer.lookForToken();
     }
@@ -400,8 +400,8 @@ void Parser::mul_expr()
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("mul");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("mul");
         }
         tok = lexer.lookForToken();
     }
@@ -444,8 +444,8 @@ void Parser::postfix_expr()
             }
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("post_e");
+                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//                .setMessage("post_e");
         }
         tok = lexer.lookForToken();
     }
