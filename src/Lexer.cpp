@@ -26,12 +26,12 @@ const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
     {"read",    {KEY_WORD, KEY_READ}},
 
 //        {"and",   {KEY_WORD, KEY_AND}},
-//        {"begin",   {KEY_WORD, KEY_BEGIN}},
+    {"begin",   {KEY_WORD, KEY_BEGIN}},
 //        {"case",   {KEY_WORD, KEY_CASE}},
 //        {"const",   {KEY_WORD, KEY_CONST}},
 //        {"div",   {KEY_WORD, KEY_DIV}},
 //        {"downto",   {KEY_WORD, KEY_DOWNTO}},
-//        {"end",   {KEY_WORD, KEY_END}},
+    {"end",   {KEY_WORD, KEY_END}},
 //        {"file",   {KEY_WORD, KEY_FILE}},
 //        {"for",   {KEY_WORD, KEY_FOR}},
 //        {"function",   {KEY_WORD, KEY_FUNCTION}},
@@ -70,7 +70,7 @@ bool Lexer::isWhitespace(char ch)
 
 bool Lexer::isOperator(char ch)
 {
-    return ((std::string) ",=+-*/^\()[]{}<>|&").find(ch) != -1;
+    return ((std::string) ",=+-*/^\()[]{}<>&").find(ch) != -1;
 }
 
 /**
@@ -205,10 +205,6 @@ Token Lexer::nextToken()
             case '&':
                 position++;
                 state = st_and;
-                break;
-            case '|':
-                position++;
-                state = st_or;
                 break;
             default:
                 state = error;

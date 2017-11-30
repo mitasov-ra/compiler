@@ -72,12 +72,12 @@ string keyWord[] = {
     //  "KEY_FLOAT",
 
 //        "KEY_AND",
-//        "KEY_BEGIN",
+        "KEY_BEGIN",
 //        "KEY_CASE",
 //        "KEY_CONST",
 //        "KEY_DIV",
 //        "KEY_DOWNTO",
-//        "KEY_END",
+        "KEY_END",
 //        "KEY_FILE",
 //        "KEY_FOR",
 //        "KEY_FUNCTION",
@@ -164,7 +164,7 @@ int main()
     cout << std::endl;
 
     fin.close();
-    fin.open("main.txt");
+    fin.open(file);
 
 //    lex = Lexer(fin);
 //    tok = lex.lookForToken();
