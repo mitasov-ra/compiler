@@ -164,7 +164,7 @@ int main()
     cout << std::endl;
 
     fin.close();
-    fin.open("main.txt");
+    fin.open(file);
 
 //    lex = Lexer(fin);
 //    tok = lex.lookForToken();
