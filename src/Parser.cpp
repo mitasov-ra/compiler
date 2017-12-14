@@ -269,7 +269,7 @@ void Parser::assignment()
     }
 
     if (lexer.nextToken().compare(ONE_LIT_DELIM, ASSIGN)) {
-        or_expr();
+        add_expr();
     } else {
         throw SyntaxException(errs::OPERATOR_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -308,7 +308,7 @@ void Parser::and_expr()
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-                //.setMessage("and");
+//                .setMessage("and");
         }
         tok = lexer.lookForToken();
     }
@@ -413,6 +413,7 @@ void Parser::l_unary_expr()
     if (tok.compare(ONE_LIT_DELIM, NOT)) {
 
     }
+    
     l_primary_expr();
 }
 
@@ -421,34 +422,28 @@ void Parser::m_unary_expr()
     auto tok = lexer.lookForToken();
     if (tok.compare(ONE_LIT_DELIM, MINUS)) {
         lexer.nextToken();
-    } else if (tok.compare(TWO_LIT_DELIM, INCR)) {
-
-    } else if (tok.compare(TWO_LIT_DELIM, DECR)) {
-
     }
 
-    postfix_expr();
+    m_primary_expr();
 }
 
 void Parser::postfix_expr()
 {
-    m_primary_expr();
-    auto tok = lexer.lookForToken();
-    while (!followsPostfixExpr(tok)) {
-        if (tok.compare(ONE_LIT_DELIM, LBRACKET)) {
-            lexer.nextToken();
-            add_expr();
-            if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
-                throw SyntaxException(errs::RBRACKET_MISSING)
-                    .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-            }
-        } else {
-            throw SyntaxException(errs::OPERATOR_MISSING)
+    auto tok = lexer.nextToken();
+    /////////
+    
+    tok = lexer.lookForToken();
+    if (tok.compare(ONE_LIT_DELIM, LBRACKET)) {
+        lexer.nextToken();
+        
+        add_expr();
+        
+        if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
+            throw SyntaxException(errs::RBRACKET_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-//                .setMessage("post_e");
         }
-        tok = lexer.lookForToken();
     }
+    
 }
 
 void Parser::l_primary_expr()
@@ -461,11 +456,6 @@ void Parser::l_primary_expr()
     }
 
     if (tok.compare(KEY_WORD, KEY_FALSE)) {
-
-        return;
-    }
-
-    if (tok.type == IDENTIFIER) {
 
         return;
     }
@@ -497,17 +487,20 @@ void Parser::l_primary_expr()
 
 void Parser::m_primary_expr()
 {
-    auto tok = lexer.nextToken();
-
+	auto tok = lexer.lookForToken();
+	
+	if (tok.type == IDENTIFIER) {
+		postfix_expr();
+        return;
+    }
+    
+    tok = lexer.nextToken();
     if (tok.type == INTEGER) {
 
         return;
     }
 
-    if (tok.type == IDENTIFIER) {
-
-        return;
-    }
+    
 
     if (tok.compare(ONE_LIT_DELIM, OneLitDelim::LPAREN)) {
         add_expr();
