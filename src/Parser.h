@@ -18,7 +18,11 @@ namespace compiler
 
         std::ofstream fout;
 
+        int labelCount = 0;
+
         char labelAnchor = '$';
+
+        std::string generateLabel();
 
         bool followsOr(const Token &t) const noexcept;
 

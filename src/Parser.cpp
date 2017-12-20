@@ -20,12 +20,12 @@ void Parser::parse(const std::string &fileName)
 //    }
 
     fout << "code segment" << endl;
-//    fout << "assume cs: code, ds:data" <<endl;
+    fout << "assume cs:code"/*, ds:data"*/ << endl;
     fout << labelAnchor << "START:	" << endl;
 //    fout << labelAnchor << "mov ax, data" << endl;
 //    fout << "mov ds, ax" << endl << endl;
 
-    add_expr();
+    or_expr();
 
 //    block();
 
@@ -301,6 +301,9 @@ void Parser::or_expr()
         if (tok.compare(TWO_LIT_DELIM, OR)) {
             and_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "or ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -318,7 +321,9 @@ void Parser::and_expr()
         tok = lexer.nextToken();
         if (tok.compare(TWO_LIT_DELIM, AND)) {
             l_unary_expr();
-
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "and ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -338,10 +343,37 @@ void Parser::equation()
         if (tok.compare(TWO_LIT_DELIM, EQUALS)) {
             relation();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "je " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else if (tok.compare(TWO_LIT_DELIM, NOT_EQ)) {
             relation();
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
 
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jne " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
@@ -362,14 +394,76 @@ void Parser::relation()
         if (tok.compare(ONE_LIT_DELIM, MORE)) {
             add_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jg " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
+
         } else if (tok.compare(ONE_LIT_DELIM, LESS)) {
             add_expr();
+
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jl " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else if (tok.compare(TWO_LIT_DELIM, LESS_OR_EQ)) {
             add_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jge " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
         } else if (tok.compare(TWO_LIT_DELIM, MORE_OR_EQ)) {
             add_expr();
+
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jle " << trueLabel << endl;
+            fout << "push 0" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
@@ -437,7 +531,11 @@ void Parser::l_unary_expr()
 {
     auto tok = lexer.lookForToken();
     if (tok.compare(ONE_LIT_DELIM, NOT)) {
+        fout << "pop ax" << endl;
+        fout << "not ax" << endl;
+        fout << "push ax" << endl;
 
+        lexer.nextToken();
     }
     
     l_primary_expr();
@@ -481,11 +579,15 @@ void Parser::l_primary_expr()
     auto tok = lexer.nextToken();
 
     if (tok.compare(KEY_WORD, KEY_TRUE)) {
+        fout << "mov ax, 1" << endl;
+        fout << "push ax" << endl;
 
         return;
     }
 
     if (tok.compare(KEY_WORD, KEY_FALSE)) {
+        fout << "mov ax, 0" << endl;
+        fout << "push ax" << endl;
 
         return;
     }
@@ -574,4 +676,9 @@ bool Parser::followsAdd(const Token &tok) const noexcept
 bool Parser::followsMul(const Token &tok) const noexcept
 {
     return followsAdd(tok) || tok.type == ONE_LIT_DELIM && tok.id == PLUS || tok.id == MINUS;
+}
+
+std::string Parser::generateLabel()
+{
+    return labelAnchor + std::to_string(labelCount++);
 }
