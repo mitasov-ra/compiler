@@ -45,21 +45,15 @@ void Parser::var()
     }
     auto tok = lexer.lookForToken();
     do {
-        if (tok.type == KEY_WORD) {
-            if (tok.id == KEY_ARRAY) {
-                array_type();
-            } else {
-                type();
-            }
-            if (lexer.nextToken().type == IDENTIFIER) {
-
-            }
-            line_sep();
+        if (tok.compare(KEY_WORD, KEY_ARRAY)) {
+            array_type();
         } else {
-            throw SyntaxException(errs::KEYWORD_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
-                .setMessage("Пропущен тип переменной");
+            type();
         }
+        if (lexer.nextToken().type == IDENTIFIER) {
+
+        }
+        line_sep();
 
         tok = lexer.lookForToken();
 
