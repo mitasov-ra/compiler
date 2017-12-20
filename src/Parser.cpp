@@ -11,13 +11,14 @@ void Parser::parse(const std::string &fileName)
 {
     fout = std::ofstream();
     fout.open(fileName);
+    fout << "data segment" << endl;
+
 
 //    program();
 //    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
-//        fout << "data segment" << endl;
 //        var();
-//        fout << "data ends" << endl;
 //    }
+//    fout << "data ends" << endl;
 
     fout << "code segment" << endl;
     fout << "assume cs:code"/*, ds:data"*/ << endl;
@@ -46,9 +47,9 @@ void Parser::program()
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
             .setMessage("program: не найдено начало программы");
     }
-
-    if (lexer.nextToken().type == IDENTIFIER) {
-
+    auto tok = lexer.nextToken();
+    if (tok.type == IDENTIFIER) {
+        fout << "PROGRAM_NAME db \"" << tables->identifiers[tok.id] << "\", 0" << endl;
     } else {
         throw SyntaxException(errs::IDENTIFIER_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
@@ -66,13 +67,14 @@ void Parser::var()
     }
     auto tok = lexer.lookForToken();
     do {
+        tok = lexer.nextToken();
+        if (tok.type == IDENTIFIER) {
+            fout << tables->identifiers[tok.id] << " db";
+        }
         if (tok.compare(KEY_WORD, KEY_ARRAY)) {
             array_type();
         } else {
             type();
-        }
-        if (lexer.nextToken().type == IDENTIFIER) {
-
         }
         line_sep();
 
@@ -88,11 +90,11 @@ void Parser::type()
         switch (tok.id) {
         case KEY_INT:
             lexer.nextToken();
-
+            fout << "0" << endl;
             break;
         case KEY_STRING:
             lexer.nextToken();
-
+            fout << "\"\", 0" << endl;
             break;
         default:
             goto type_error;
@@ -516,6 +518,7 @@ void Parser::mul_expr()
             m_primary_expr();
 
             fout << "pop bx" << endl << "pop ax" << endl;
+            fout << 'xor dx, dx' << endl;
             fout << "mul bx" << endl;
             fout << "push ax" << endl;
         } else {

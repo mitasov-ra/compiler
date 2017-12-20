@@ -95,7 +95,6 @@ namespace compiler
             tables(tables),
             lexer(sin, tables) {}
 
-
     };
 }
 #endif
