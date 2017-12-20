@@ -34,8 +34,8 @@ namespace compiler
         RPAREN,
         LBRACKET,
         RBRACKET,
-        LBRACE,
-        RBRACE,
+//        LBRACE,
+//        RBRACE,
         MORE,
         LESS,
         NOT,
@@ -62,11 +62,11 @@ namespace compiler
     enum KeyWord
     {
         KEY_PROGRAM,
-        KEY_VAR,
+        KEY_DIM,
         KEY_IF,
         KEY_ELSE,
         KEY_THEN,
-        KEY_PRINT,
+        KEY_WRITE,
         KEY_READ,
         KEY_TRUE,
         KEY_FALSE,
@@ -76,6 +76,8 @@ namespace compiler
         KEY_OF,
         KEY_WHILE,
         KEY_DO,
+        KEY_START,
+        KEY_END,
 //         KEY_FLOAT,
 
 //        KEY_AND,

@@ -55,11 +55,11 @@ string twoLitDelim[] = {
 
 string keyWord[] = {
     "KEY_PROGRAM",
-    "KEY_VAR",
+    "KEY_DIM",
     "KEY_IF",
     "KEY_ELSE",
     "KEY_THEN",
-    "KEY_PRINT",
+    "KEY_WRITE",
     "KEY_READ",
     "KEY_TRUE",
     "KEY_FALSE",

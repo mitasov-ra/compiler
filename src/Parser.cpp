@@ -8,7 +8,7 @@ typedef SyntaxException::Errors errs;
 void Parser::parse(const std::string &fileName)
 {
     program();
-    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
+    if (lexer.lookForToken().compare(KEY_WORD, KEY_DIM)) {
         var();
     }
     block();
@@ -38,7 +38,7 @@ void Parser::program()
 
 void Parser::var()
 {
-    if (!lexer.nextToken().compare(KEY_WORD, KEY_VAR)) {
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_DIM)) {
         throw SyntaxException(errs::KEYWORD_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
             .setMessage("Не найден var");
@@ -57,7 +57,7 @@ void Parser::var()
 
         tok = lexer.lookForToken();
 
-    } while (!tok.compare(ONE_LIT_DELIM, LBRACE));
+    } while (!tok.compare(KEY_WORD, KEY_START));
 }
 
 void Parser::type()
@@ -116,14 +116,14 @@ void Parser::array_type()
 
 void Parser::block()
 {
-    if (!lexer.nextToken().compare(ONE_LIT_DELIM, LBRACE)) {
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_START)) {
         throw SyntaxException(errs::LBRACE_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
     }
 
     statement();
 
-    if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACE)) {
+    if (!lexer.nextToken().compare(KEY_WORD, KEY_END)) {
         throw SyntaxException(errs::RBRACE_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
     }
@@ -132,12 +132,12 @@ void Parser::block()
 void Parser::statement()
 {
     auto tok = lexer.lookForToken();
-    while (!tok.compare(ONE_LIT_DELIM, RBRACE)) {
+    while (!tok.compare(KEY_WORD, KEY_END)) {
         if (tok.compare(KEY_WORD, KEY_IF)) {
 
             if_statement();
 
-        } else if (tok.compare(KEY_WORD, KEY_PRINT)) {
+        } else if (tok.compare(KEY_WORD, KEY_WRITE)) {
 
             print_statement();
 
@@ -337,6 +337,7 @@ void Parser::relation()
     add_expr();
 
     auto tok = lexer.lookForToken();
+    bool bbb = followsRelation(tok);
     if (!followsRelation(tok)) {
         tok = lexer.nextToken();
         if (tok.compare(ONE_LIT_DELIM, MORE)) {
@@ -528,7 +529,7 @@ bool Parser::followsEquation(const Token &tok) const noexcept
 
 bool Parser::followsRelation(const Token &tok) const noexcept
 {
-    return followsEquation(tok) || tok.type == TWO_LIT_DELIM && tok.id == EQUALS || tok.id == NOT_EQ;
+    return followsEquation(tok) || tok.type == TWO_LIT_DELIM && (tok.id == EQUALS || tok.id == NOT_EQ);
 }
 
 bool Parser::followsAdd(const Token &tok) const noexcept

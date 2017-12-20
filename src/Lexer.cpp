@@ -9,11 +9,11 @@ using namespace compiler;
  * Инициализация набора ключевых слов
  */
 const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
-    {"var",     {KEY_WORD, KEY_VAR}},
+    {"dim",     {KEY_WORD, KEY_DIM}},
     {"if",      {KEY_WORD, KEY_IF}},
     {"then",    {KEY_WORD, KEY_THEN}},
     {"else",    {KEY_WORD, KEY_ELSE}},
-    {"print",   {KEY_WORD, KEY_PRINT}},
+    {"write",   {KEY_WORD, KEY_WRITE}},
     {"program", {KEY_WORD, KEY_PROGRAM}},
     {"true",    {KEY_WORD, KEY_TRUE}},
     {"false",   {KEY_WORD, KEY_FALSE}},
@@ -24,6 +24,8 @@ const std::unordered_map<std::string, Token> Lexer::keyWordTokens = {
     {"while",   {KEY_WORD, KEY_WHILE}},
     {"do",      {KEY_WORD, KEY_DO}},
     {"read",    {KEY_WORD, KEY_READ}},
+    {"start",   {KEY_WORD, KEY_START}},
+    {"end",     {KEY_WORD, KEY_END}},
 
 //        {"and",   {KEY_WORD, KEY_AND}},
 //        {"begin",   {KEY_WORD, KEY_BEGIN}},
@@ -160,12 +162,12 @@ Token Lexer::nextToken()
             case ']':
                 position++;
                 return {ONE_LIT_DELIM, RBRACKET};
-            case '{':
-                position++;
-                return {ONE_LIT_DELIM, LBRACE};
-            case '}':
-                position++;
-                return {ONE_LIT_DELIM, RBRACE};
+//            case '{':
+//                position++;
+//                return {ONE_LIT_DELIM, LBRACE};
+//            case '}':
+//                position++;
+//                return {ONE_LIT_DELIM, RBRACE};
 
             case '*':
                 position++;
