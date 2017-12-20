@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <utility>
+#include <fstream>
 
 #include "Lexer.h"
 #include "TokenTables.h"
@@ -15,6 +16,10 @@ namespace compiler
         Lexer lexer;
         std::shared_ptr<TokenTables> tables;
 
+        std::ofstream fout;
+
+        char labelAnchor = '$';
+
         bool followsOr(const Token &t) const noexcept;
 
         bool followsAnd(const Token &t) const noexcept;
@@ -26,8 +31,6 @@ namespace compiler
         bool followsAdd(const Token &t) const noexcept;
 
         bool followsMul(const Token &t) const noexcept;
-
-        bool followsPostfixExpr(const Token &tok) const noexcept;
 
         void line_sep();
 

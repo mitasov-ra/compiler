@@ -263,7 +263,7 @@ int main()
     tables = make_shared<TokenTables>();
     Parser parser = Parser(fin, tables);
     try {
-        parser.parse("file1");
+        parser.parse("file1.asm");
         cout << "Успешно!\n";
     } catch (SyntaxException &e) {
         e.printError();

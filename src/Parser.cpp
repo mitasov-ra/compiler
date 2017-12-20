@@ -1,21 +1,42 @@
 #include <iostream>
+#include <fstream>
 #include "Parser.h"
 #include "compiler.h"
 
 using namespace compiler;
+using std::endl;
 typedef SyntaxException::Errors errs;
 
 void Parser::parse(const std::string &fileName)
 {
-    program();
-    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
-        var();
-    }
-    block();
-    if (!lexer.nextToken().compare(ONE_LIT_DELIM, INPUT_END)) {
-        throw SyntaxException(errs::CODE_AFTER_END)
-            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-    }
+    fout = std::ofstream();
+    fout.open(fileName);
+
+//    program();
+//    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
+//        fout << "data segment" << endl;
+//        var();
+//        fout << "data ends" << endl;
+//    }
+
+    fout << "code segment" << endl;
+//    fout << "assume cs: code, ds:data" <<endl;
+    fout << labelAnchor << "START:	" << endl;
+//    fout << labelAnchor << "mov ax, data" << endl;
+//    fout << "mov ds, ax" << endl << endl;
+
+    add_expr();
+
+//    block();
+
+//    if (!lexer.nextToken().compare(ONE_LIT_DELIM, INPUT_END)) {
+//        throw SyntaxException(errs::CODE_AFTER_END)
+//            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//    }
+    fout << "QUIT: mov ax, 4c00h" << endl;
+    fout << "Int 21h" << endl;
+    fout << "code ends" << endl;
+    fout << "end " << labelAnchor << "START" << endl;
 }
 
 void Parser::program()
@@ -271,7 +292,6 @@ void Parser::assignment()
     }
 }
 
-
 void Parser::or_expr()
 {
     and_expr();
@@ -368,9 +388,15 @@ void Parser::add_expr()
         if (tok.compare(ONE_LIT_DELIM, PLUS)) {
             mul_expr();
 
+            fout << "pop ax" << endl << "pop bx" << endl;
+            fout << "add ax, bx" << endl;
+            fout << "push ax" << endl;
         } else if (tok.compare(ONE_LIT_DELIM, MINUS)) {
             mul_expr();
 
+            fout << "pop ax" << endl << "pop bx" << endl;
+            fout << "sub ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -389,9 +415,15 @@ void Parser::mul_expr()
         if (tok.compare(ONE_LIT_DELIM, DIV)) {
             m_primary_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "div bx" << endl;
+            fout << "push ax" << endl;
         } else if (tok.compare(ONE_LIT_DELIM, MULT)) {
             m_primary_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "mul bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -415,6 +447,10 @@ void Parser::m_unary_expr()
 {
     auto tok = lexer.lookForToken();
     if (tok.compare(ONE_LIT_DELIM, MINUS)) {
+        fout << "pop ax" << endl;
+        fout << "neg ax" << endl;
+        fout << "push ax" << endl;
+
         lexer.nextToken();
     }
 
@@ -462,7 +498,6 @@ void Parser::l_primary_expr()
         }
         throw SyntaxException(errs::EXPR_SEP_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-
     }
     if (tok.compare(ONE_LIT_DELIM, OneLitDelim::LPAREN)) {
         or_expr();
@@ -490,11 +525,10 @@ void Parser::m_primary_expr()
     
     tok = lexer.nextToken();
     if (tok.type == INTEGER) {
-
+        fout << "mov ax, " << tables->integers[tok.id] << endl;
+        fout << "push ax" << endl;
         return;
     }
-
-    
 
     if (tok.compare(ONE_LIT_DELIM, OneLitDelim::LPAREN)) {
         add_expr();
@@ -540,9 +574,4 @@ bool Parser::followsAdd(const Token &tok) const noexcept
 bool Parser::followsMul(const Token &tok) const noexcept
 {
     return followsAdd(tok) || tok.type == ONE_LIT_DELIM && tok.id == PLUS || tok.id == MINUS;
-}
-
-bool Parser::followsPostfixExpr(const Token &tok) const noexcept
-{
-    return followsMul(tok);
 }
