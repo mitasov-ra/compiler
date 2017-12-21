@@ -70,7 +70,7 @@ bool Lexer::isWhitespace(char ch)
 
 bool Lexer::isOperator(char ch)
 {
-    return ((std::string) ",=+-*/^\()[]{}<>&").find(ch) != -1;
+    return ((std::string) ",=+-*/^()[]{}<>|&").find(ch) != -1;
 }
 
 /**

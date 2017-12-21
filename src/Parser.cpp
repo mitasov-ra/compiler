@@ -1,21 +1,43 @@
 #include <iostream>
+#include <fstream>
 #include "Parser.h"
 #include "compiler.h"
 
 using namespace compiler;
+using std::endl;
 typedef SyntaxException::Errors errs;
 
 void Parser::parse(const std::string &fileName)
 {
-    program();
-    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
-        var();
-    }
-    block();
-    if (!lexer.nextToken().compare(ONE_LIT_DELIM, INPUT_END)) {
-        throw SyntaxException(errs::CODE_AFTER_END)
-            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-    }
+    fout = std::ofstream();
+    fout.open(fileName);
+    fout << "data segment" << endl;
+
+
+//    program();
+//    if (lexer.lookForToken().compare(KEY_WORD, KEY_VAR)) {
+//        var();
+//    }
+//    fout << "data ends" << endl;
+
+    fout << "code segment" << endl;
+    fout << "assume cs:code"/*, ds:data"*/ << endl;
+    fout << labelAnchor << "START:	" << endl;
+//    fout << labelAnchor << "mov ax, data" << endl;
+//    fout << "mov ds, ax" << endl << endl;
+
+    or_expr();
+
+//    block();
+
+//    if (!lexer.nextToken().compare(ONE_LIT_DELIM, INPUT_END)) {
+//        throw SyntaxException(errs::CODE_AFTER_END)
+//            .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//    }
+    fout << "QUIT: mov ax, 4c00h" << endl;
+    fout << "Int 21h" << endl;
+    fout << "code ends" << endl;
+    fout << "end " << labelAnchor << "START" << endl;
 }
 
 void Parser::program()
@@ -25,9 +47,9 @@ void Parser::program()
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
             .setMessage("program: не найдено начало программы");
     }
-
-    if (lexer.nextToken().type == IDENTIFIER) {
-
+    auto tok = lexer.nextToken();
+    if (tok.type == IDENTIFIER) {
+        fout << "PROGRAM_NAME db \"" << tables->identifiers[tok.id] << "\", 0" << endl;
     } else {
         throw SyntaxException(errs::IDENTIFIER_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition())
@@ -45,15 +67,15 @@ void Parser::var()
     }
     auto tok = lexer.lookForToken();
     do {
-        type();
         tok = lexer.nextToken();
         if (tok.type == IDENTIFIER) {
-    
-        } else {
-            throw SyntaxException(errs::IDENTIFIER_MISSING)
-                .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
+//            fout << tables->identifiers[tok.id] << " db";
         }
-
+        if (tok.compare(KEY_WORD, KEY_ARRAY)) {
+            array_type();
+        } else {
+            type();
+        }
         line_sep();
 
         tok = lexer.lookForToken();
@@ -68,11 +90,11 @@ void Parser::type()
         switch (tok.id) {
         case KEY_INT:
             lexer.nextToken();
-
+//            fout << "0" << endl;
             break;
         case KEY_STRING:
             lexer.nextToken();
-
+//            fout << "\"\", 0" << endl;
             break;
         case KEY_ARRAY:
             array_type();
@@ -272,14 +294,13 @@ void Parser::assignment()
     }
 
     if (lexer.nextToken().compare(ONE_LIT_DELIM, ASSIGN)) {
-        or_expr();
+        add_expr();
     } else {
         throw SyntaxException(errs::OPERATOR_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
 //            .setMessage("assignment");
     }
 }
-
 
 void Parser::or_expr()
 {
@@ -290,6 +311,9 @@ void Parser::or_expr()
         if (tok.compare(TWO_LIT_DELIM, OR)) {
             and_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "or ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -307,11 +331,13 @@ void Parser::and_expr()
         tok = lexer.nextToken();
         if (tok.compare(TWO_LIT_DELIM, AND)) {
             l_unary_expr();
-
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "and ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-                //.setMessage("and");
+//                .setMessage("and");
         }
         tok = lexer.lookForToken();
     }
@@ -327,10 +353,37 @@ void Parser::equation()
         if (tok.compare(TWO_LIT_DELIM, EQUALS)) {
             relation();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "je " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else if (tok.compare(TWO_LIT_DELIM, NOT_EQ)) {
             relation();
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
 
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jne " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
@@ -351,14 +404,76 @@ void Parser::relation()
         if (tok.compare(ONE_LIT_DELIM, MORE)) {
             add_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jg " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
+
         } else if (tok.compare(ONE_LIT_DELIM, LESS)) {
             add_expr();
+
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jl " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else if (tok.compare(TWO_LIT_DELIM, LESS_OR_EQ)) {
             add_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jge " << trueLabel << endl;
+            fout << "mov ax, 0" << endl;
+            fout << "push ax" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
         } else if (tok.compare(TWO_LIT_DELIM, MORE_OR_EQ)) {
             add_expr();
+
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "cmp ax, bx" << endl;
+
+            std::string trueLabel = generateLabel();
+            std::string endLabel = generateLabel();
+
+            fout << "jle " << trueLabel << endl;
+            fout << "push 0" << endl;
+            fout << "jmp " << endLabel << endl;
+
+            fout << trueLabel << ": mov ax, 1" << endl;
+            fout << "push ax" << endl;
+
+            fout << endLabel << ":" << endl;
 
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
@@ -377,9 +492,15 @@ void Parser::add_expr()
         if (tok.compare(ONE_LIT_DELIM, PLUS)) {
             mul_expr();
 
+            fout << "pop ax" << endl << "pop bx" << endl;
+            fout << "add ax, bx" << endl;
+            fout << "push ax" << endl;
         } else if (tok.compare(ONE_LIT_DELIM, MINUS)) {
             mul_expr();
 
+            fout << "pop ax" << endl << "pop bx" << endl;
+            fout << "sub ax, bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -398,9 +519,16 @@ void Parser::mul_expr()
         if (tok.compare(ONE_LIT_DELIM, DIV)) {
             m_primary_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << "div bx" << endl;
+            fout << "push ax" << endl;
         } else if (tok.compare(ONE_LIT_DELIM, MULT)) {
             m_primary_expr();
 
+            fout << "pop bx" << endl << "pop ax" << endl;
+            fout << 'xor dx, dx' << endl;
+            fout << "mul bx" << endl;
+            fout << "push ax" << endl;
         } else {
             throw SyntaxException(errs::OPERATOR_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
@@ -414,8 +542,13 @@ void Parser::l_unary_expr()
 {
     auto tok = lexer.lookForToken();
     if (tok.compare(ONE_LIT_DELIM, NOT)) {
+        fout << "pop ax" << endl;
+        fout << "not ax" << endl;
+        fout << "push ax" << endl;
 
+        lexer.nextToken();
     }
+    
     l_primary_expr();
 }
 
@@ -423,35 +556,33 @@ void Parser::m_unary_expr()
 {
     auto tok = lexer.lookForToken();
     if (tok.compare(ONE_LIT_DELIM, MINUS)) {
+        fout << "pop ax" << endl;
+        fout << "neg ax" << endl;
+        fout << "push ax" << endl;
+
         lexer.nextToken();
-    } else if (tok.compare(TWO_LIT_DELIM, INCR)) {
-
-    } else if (tok.compare(TWO_LIT_DELIM, DECR)) {
-
     }
 
-    postfix_expr();
+    m_primary_expr();
 }
 
 void Parser::postfix_expr()
 {
-    m_primary_expr();
-    auto tok = lexer.lookForToken();
-    while (!followsPostfixExpr(tok)) {
-        if (tok.compare(ONE_LIT_DELIM, LBRACKET)) {
-            lexer.nextToken();
-            add_expr();
-            if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
-                throw SyntaxException(errs::RBRACKET_MISSING)
-                    .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-            }
-        } else {
-            throw SyntaxException(errs::OPERATOR_MISSING)
+    auto tok = lexer.nextToken();
+    /////////
+    
+    tok = lexer.lookForToken();
+    if (tok.compare(ONE_LIT_DELIM, LBRACKET)) {
+        lexer.nextToken();
+        
+        add_expr();
+        
+        if (!lexer.nextToken().compare(ONE_LIT_DELIM, RBRACKET)) {
+            throw SyntaxException(errs::RBRACKET_MISSING)
                 .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-//                .setMessage("post_e");
         }
-        tok = lexer.lookForToken();
     }
+    
 }
 
 void Parser::l_primary_expr()
@@ -459,16 +590,15 @@ void Parser::l_primary_expr()
     auto tok = lexer.nextToken();
 
     if (tok.compare(KEY_WORD, KEY_TRUE)) {
+        fout << "mov ax, 1" << endl;
+        fout << "push ax" << endl;
 
         return;
     }
 
     if (tok.compare(KEY_WORD, KEY_FALSE)) {
-
-        return;
-    }
-
-    if (tok.type == IDENTIFIER) {
+        fout << "mov ax, 0" << endl;
+        fout << "push ax" << endl;
 
         return;
     }
@@ -481,7 +611,6 @@ void Parser::l_primary_expr()
         }
         throw SyntaxException(errs::EXPR_SEP_MISSING)
             .setLineAndPos(lexer.getLine(), lexer.getLastTokenPosition());
-
     }
     if (tok.compare(ONE_LIT_DELIM, OneLitDelim::LPAREN)) {
         or_expr();
@@ -500,15 +629,17 @@ void Parser::l_primary_expr()
 
 void Parser::m_primary_expr()
 {
-    auto tok = lexer.nextToken();
-
-    if (tok.type == INTEGER) {
-
+	auto tok = lexer.lookForToken();
+	
+	if (tok.type == IDENTIFIER) {
+		postfix_expr();
         return;
     }
-
-    if (tok.type == IDENTIFIER) {
-
+    
+    tok = lexer.nextToken();
+    if (tok.type == INTEGER) {
+        fout << "mov ax, " << tables->integers[tok.id] << endl;
+        fout << "push ax" << endl;
         return;
     }
 
@@ -558,7 +689,7 @@ bool Parser::followsMul(const Token &tok) const noexcept
     return followsAdd(tok) || tok.type == ONE_LIT_DELIM && tok.id == PLUS || tok.id == MINUS;
 }
 
-bool Parser::followsPostfixExpr(const Token &tok) const noexcept
+std::string Parser::generateLabel()
 {
-    return followsMul(tok);
+    return labelAnchor + std::to_string(labelCount++);
 }
