@@ -69,6 +69,8 @@ string keyWord[] = {
     "KEY_OF",
     "KEY_WHILE",
     "KEY_DO",
+    "ks",
+    "ke"
     //  "KEY_FLOAT",
 
 //        "KEY_AND",
